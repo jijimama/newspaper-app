@@ -1,6 +1,11 @@
 package schema
 
-import "entgo.io/ent"
+import (
+    "entgo.io/ent"
+    "entgo.io/ent/schema/edge"
+    "entgo.io/ent/schema/field"
+	"time"
+)
 
 // Article holds the schema definition for the Article entity.
 type Article struct {
@@ -9,10 +14,28 @@ type Article struct {
 
 // Fields of the Article.
 func (Article) Fields() []ent.Field {
-	return nil
+	return []ent.Field{
+		field.Text("content").
+			NotEmpty(),
+		field.Int("year").
+			Positive(),
+		field.Int("month").
+			Range(1, 12),
+		field.Int("day").
+			Range(1, 31),
+		field.Time("created_at").
+			Default(time.Now),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now),
+	}
 }
 
 // Edges of the Article.
 func (Article) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("column", Column.Type).
+			Ref("articles").
+			Unique(),
+	}
 }
