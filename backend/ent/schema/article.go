@@ -34,7 +34,7 @@ func (Article) Fields() []ent.Field {
 // Edges of the Article.
 func (Article) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("column", Column.Type).
+		edge.From("newspaper", Newspaper.Type).
 			Ref("articles").
 			Unique(),
 	}

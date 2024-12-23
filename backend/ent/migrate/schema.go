@@ -17,7 +17,7 @@ var (
 		{Name: "day", Type: field.TypeInt},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "column_articles", Type: field.TypeInt, Nullable: true},
+		{Name: "newspaper_articles", Type: field.TypeInt, Nullable: true},
 	}
 	// ArticlesTable holds the schema information for the "articles" table.
 	ArticlesTable = &schema.Table{
@@ -26,30 +26,8 @@ var (
 		PrimaryKey: []*schema.Column{ArticlesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "articles_columns_articles",
+				Symbol:     "articles_newspapers_articles",
 				Columns:    []*schema.Column{ArticlesColumns[7]},
-				RefColumns: []*schema.Column{ColumnsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// ColumnsColumns holds the columns for the "columns" table.
-	ColumnsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "newspaper_columns", Type: field.TypeInt, Nullable: true},
-	}
-	// ColumnsTable holds the schema information for the "columns" table.
-	ColumnsTable = &schema.Table{
-		Name:       "columns",
-		Columns:    ColumnsColumns,
-		PrimaryKey: []*schema.Column{ColumnsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "columns_newspapers_columns",
-				Columns:    []*schema.Column{ColumnsColumns[4]},
 				RefColumns: []*schema.Column{NewspapersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -59,6 +37,7 @@ var (
 	NewspapersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "column_name", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -71,12 +50,10 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ArticlesTable,
-		ColumnsTable,
 		NewspapersTable,
 	}
 )
 
 func init() {
-	ArticlesTable.ForeignKeys[0].RefTable = ColumnsTable
-	ColumnsTable.ForeignKeys[0].RefTable = NewspapersTable
+	ArticlesTable.ForeignKeys[0].RefTable = NewspapersTable
 }

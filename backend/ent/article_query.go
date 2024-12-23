@@ -12,19 +12,19 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/jijimama/newspaper-app/ent/article"
-	"github.com/jijimama/newspaper-app/ent/column"
+	"github.com/jijimama/newspaper-app/ent/newspaper"
 	"github.com/jijimama/newspaper-app/ent/predicate"
 )
 
 // ArticleQuery is the builder for querying Article entities.
 type ArticleQuery struct {
 	config
-	ctx        *QueryContext
-	order      []article.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Article
-	withColumn *ColumnQuery
-	withFKs    bool
+	ctx           *QueryContext
+	order         []article.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.Article
+	withNewspaper *NewspaperQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,9 +61,9 @@ func (aq *ArticleQuery) Order(o ...article.OrderOption) *ArticleQuery {
 	return aq
 }
 
-// QueryColumn chains the current query on the "column" edge.
-func (aq *ArticleQuery) QueryColumn() *ColumnQuery {
-	query := (&ColumnClient{config: aq.config}).Query()
+// QueryNewspaper chains the current query on the "newspaper" edge.
+func (aq *ArticleQuery) QueryNewspaper() *NewspaperQuery {
+	query := (&NewspaperClient{config: aq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -74,8 +74,8 @@ func (aq *ArticleQuery) QueryColumn() *ColumnQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(article.Table, article.FieldID, selector),
-			sqlgraph.To(column.Table, column.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, article.ColumnTable, article.ColumnColumn),
+			sqlgraph.To(newspaper.Table, newspaper.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, article.NewspaperTable, article.NewspaperColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -270,26 +270,26 @@ func (aq *ArticleQuery) Clone() *ArticleQuery {
 		return nil
 	}
 	return &ArticleQuery{
-		config:     aq.config,
-		ctx:        aq.ctx.Clone(),
-		order:      append([]article.OrderOption{}, aq.order...),
-		inters:     append([]Interceptor{}, aq.inters...),
-		predicates: append([]predicate.Article{}, aq.predicates...),
-		withColumn: aq.withColumn.Clone(),
+		config:        aq.config,
+		ctx:           aq.ctx.Clone(),
+		order:         append([]article.OrderOption{}, aq.order...),
+		inters:        append([]Interceptor{}, aq.inters...),
+		predicates:    append([]predicate.Article{}, aq.predicates...),
+		withNewspaper: aq.withNewspaper.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
 	}
 }
 
-// WithColumn tells the query-builder to eager-load the nodes that are connected to
-// the "column" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *ArticleQuery) WithColumn(opts ...func(*ColumnQuery)) *ArticleQuery {
-	query := (&ColumnClient{config: aq.config}).Query()
+// WithNewspaper tells the query-builder to eager-load the nodes that are connected to
+// the "newspaper" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *ArticleQuery) WithNewspaper(opts ...func(*NewspaperQuery)) *ArticleQuery {
+	query := (&NewspaperClient{config: aq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	aq.withColumn = query
+	aq.withNewspaper = query
 	return aq
 }
 
@@ -373,10 +373,10 @@ func (aq *ArticleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Arti
 		withFKs     = aq.withFKs
 		_spec       = aq.querySpec()
 		loadedTypes = [1]bool{
-			aq.withColumn != nil,
+			aq.withNewspaper != nil,
 		}
 	)
-	if aq.withColumn != nil {
+	if aq.withNewspaper != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -400,23 +400,23 @@ func (aq *ArticleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Arti
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := aq.withColumn; query != nil {
-		if err := aq.loadColumn(ctx, query, nodes, nil,
-			func(n *Article, e *Column) { n.Edges.Column = e }); err != nil {
+	if query := aq.withNewspaper; query != nil {
+		if err := aq.loadNewspaper(ctx, query, nodes, nil,
+			func(n *Article, e *Newspaper) { n.Edges.Newspaper = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (aq *ArticleQuery) loadColumn(ctx context.Context, query *ColumnQuery, nodes []*Article, init func(*Article), assign func(*Article, *Column)) error {
+func (aq *ArticleQuery) loadNewspaper(ctx context.Context, query *NewspaperQuery, nodes []*Article, init func(*Article), assign func(*Article, *Newspaper)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Article)
 	for i := range nodes {
-		if nodes[i].column_articles == nil {
+		if nodes[i].newspaper_articles == nil {
 			continue
 		}
-		fk := *nodes[i].column_articles
+		fk := *nodes[i].newspaper_articles
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -425,7 +425,7 @@ func (aq *ArticleQuery) loadColumn(ctx context.Context, query *ColumnQuery, node
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(column.IDIn(ids...))
+	query.Where(newspaper.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -433,7 +433,7 @@ func (aq *ArticleQuery) loadColumn(ctx context.Context, query *ColumnQuery, node
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "column_articles" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "newspaper_articles" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

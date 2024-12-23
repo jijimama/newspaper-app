@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/jijimama/newspaper-app/ent/article"
-	"github.com/jijimama/newspaper-app/ent/column"
+	"github.com/jijimama/newspaper-app/ent/newspaper"
 	"github.com/jijimama/newspaper-app/ent/predicate"
 )
 
@@ -126,23 +126,23 @@ func (au *ArticleUpdate) SetUpdatedAt(t time.Time) *ArticleUpdate {
 	return au
 }
 
-// SetColumnID sets the "column" edge to the Column entity by ID.
-func (au *ArticleUpdate) SetColumnID(id int) *ArticleUpdate {
-	au.mutation.SetColumnID(id)
+// SetNewspaperID sets the "newspaper" edge to the Newspaper entity by ID.
+func (au *ArticleUpdate) SetNewspaperID(id int) *ArticleUpdate {
+	au.mutation.SetNewspaperID(id)
 	return au
 }
 
-// SetNillableColumnID sets the "column" edge to the Column entity by ID if the given value is not nil.
-func (au *ArticleUpdate) SetNillableColumnID(id *int) *ArticleUpdate {
+// SetNillableNewspaperID sets the "newspaper" edge to the Newspaper entity by ID if the given value is not nil.
+func (au *ArticleUpdate) SetNillableNewspaperID(id *int) *ArticleUpdate {
 	if id != nil {
-		au = au.SetColumnID(*id)
+		au = au.SetNewspaperID(*id)
 	}
 	return au
 }
 
-// SetColumn sets the "column" edge to the Column entity.
-func (au *ArticleUpdate) SetColumn(c *Column) *ArticleUpdate {
-	return au.SetColumnID(c.ID)
+// SetNewspaper sets the "newspaper" edge to the Newspaper entity.
+func (au *ArticleUpdate) SetNewspaper(n *Newspaper) *ArticleUpdate {
+	return au.SetNewspaperID(n.ID)
 }
 
 // Mutation returns the ArticleMutation object of the builder.
@@ -150,9 +150,9 @@ func (au *ArticleUpdate) Mutation() *ArticleMutation {
 	return au.mutation
 }
 
-// ClearColumn clears the "column" edge to the Column entity.
-func (au *ArticleUpdate) ClearColumn() *ArticleUpdate {
-	au.mutation.ClearColumn()
+// ClearNewspaper clears the "newspaper" edge to the Newspaper entity.
+func (au *ArticleUpdate) ClearNewspaper() *ArticleUpdate {
+	au.mutation.ClearNewspaper()
 	return au
 }
 
@@ -256,28 +256,28 @@ func (au *ArticleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := au.mutation.UpdatedAt(); ok {
 		_spec.SetField(article.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if au.mutation.ColumnCleared() {
+	if au.mutation.NewspaperCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   article.ColumnTable,
-			Columns: []string{article.ColumnColumn},
+			Table:   article.NewspaperTable,
+			Columns: []string{article.NewspaperColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(newspaper.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.ColumnIDs(); len(nodes) > 0 {
+	if nodes := au.mutation.NewspaperIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   article.ColumnTable,
-			Columns: []string{article.ColumnColumn},
+			Table:   article.NewspaperTable,
+			Columns: []string{article.NewspaperColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(newspaper.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -402,23 +402,23 @@ func (auo *ArticleUpdateOne) SetUpdatedAt(t time.Time) *ArticleUpdateOne {
 	return auo
 }
 
-// SetColumnID sets the "column" edge to the Column entity by ID.
-func (auo *ArticleUpdateOne) SetColumnID(id int) *ArticleUpdateOne {
-	auo.mutation.SetColumnID(id)
+// SetNewspaperID sets the "newspaper" edge to the Newspaper entity by ID.
+func (auo *ArticleUpdateOne) SetNewspaperID(id int) *ArticleUpdateOne {
+	auo.mutation.SetNewspaperID(id)
 	return auo
 }
 
-// SetNillableColumnID sets the "column" edge to the Column entity by ID if the given value is not nil.
-func (auo *ArticleUpdateOne) SetNillableColumnID(id *int) *ArticleUpdateOne {
+// SetNillableNewspaperID sets the "newspaper" edge to the Newspaper entity by ID if the given value is not nil.
+func (auo *ArticleUpdateOne) SetNillableNewspaperID(id *int) *ArticleUpdateOne {
 	if id != nil {
-		auo = auo.SetColumnID(*id)
+		auo = auo.SetNewspaperID(*id)
 	}
 	return auo
 }
 
-// SetColumn sets the "column" edge to the Column entity.
-func (auo *ArticleUpdateOne) SetColumn(c *Column) *ArticleUpdateOne {
-	return auo.SetColumnID(c.ID)
+// SetNewspaper sets the "newspaper" edge to the Newspaper entity.
+func (auo *ArticleUpdateOne) SetNewspaper(n *Newspaper) *ArticleUpdateOne {
+	return auo.SetNewspaperID(n.ID)
 }
 
 // Mutation returns the ArticleMutation object of the builder.
@@ -426,9 +426,9 @@ func (auo *ArticleUpdateOne) Mutation() *ArticleMutation {
 	return auo.mutation
 }
 
-// ClearColumn clears the "column" edge to the Column entity.
-func (auo *ArticleUpdateOne) ClearColumn() *ArticleUpdateOne {
-	auo.mutation.ClearColumn()
+// ClearNewspaper clears the "newspaper" edge to the Newspaper entity.
+func (auo *ArticleUpdateOne) ClearNewspaper() *ArticleUpdateOne {
+	auo.mutation.ClearNewspaper()
 	return auo
 }
 
@@ -562,28 +562,28 @@ func (auo *ArticleUpdateOne) sqlSave(ctx context.Context) (_node *Article, err e
 	if value, ok := auo.mutation.UpdatedAt(); ok {
 		_spec.SetField(article.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if auo.mutation.ColumnCleared() {
+	if auo.mutation.NewspaperCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   article.ColumnTable,
-			Columns: []string{article.ColumnColumn},
+			Table:   article.NewspaperTable,
+			Columns: []string{article.NewspaperColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(newspaper.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.ColumnIDs(); len(nodes) > 0 {
+	if nodes := auo.mutation.NewspaperIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   article.ColumnTable,
-			Columns: []string{article.ColumnColumn},
+			Table:   article.NewspaperTable,
+			Columns: []string{article.NewspaperColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(newspaper.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

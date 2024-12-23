@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/jijimama/newspaper-app/ent/article"
-	"github.com/jijimama/newspaper-app/ent/column"
 	"github.com/jijimama/newspaper-app/ent/newspaper"
 	"github.com/jijimama/newspaper-app/ent/predicate"
 )
@@ -27,31 +26,30 @@ const (
 
 	// Node types.
 	TypeArticle   = "Article"
-	TypeColumn    = "Column"
 	TypeNewspaper = "Newspaper"
 )
 
 // ArticleMutation represents an operation that mutates the Article nodes in the graph.
 type ArticleMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	content       *string
-	year          *int
-	addyear       *int
-	month         *int
-	addmonth      *int
-	day           *int
-	addday        *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	column        *int
-	clearedcolumn bool
-	done          bool
-	oldValue      func(context.Context) (*Article, error)
-	predicates    []predicate.Article
+	op               Op
+	typ              string
+	id               *int
+	content          *string
+	year             *int
+	addyear          *int
+	month            *int
+	addmonth         *int
+	day              *int
+	addday           *int
+	created_at       *time.Time
+	updated_at       *time.Time
+	clearedFields    map[string]struct{}
+	newspaper        *int
+	clearednewspaper bool
+	done             bool
+	oldValue         func(context.Context) (*Article, error)
+	predicates       []predicate.Article
 }
 
 var _ ent.Mutation = (*ArticleMutation)(nil)
@@ -428,43 +426,43 @@ func (m *ArticleMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetColumnID sets the "column" edge to the Column entity by id.
-func (m *ArticleMutation) SetColumnID(id int) {
-	m.column = &id
+// SetNewspaperID sets the "newspaper" edge to the Newspaper entity by id.
+func (m *ArticleMutation) SetNewspaperID(id int) {
+	m.newspaper = &id
 }
 
-// ClearColumn clears the "column" edge to the Column entity.
-func (m *ArticleMutation) ClearColumn() {
-	m.clearedcolumn = true
+// ClearNewspaper clears the "newspaper" edge to the Newspaper entity.
+func (m *ArticleMutation) ClearNewspaper() {
+	m.clearednewspaper = true
 }
 
-// ColumnCleared reports if the "column" edge to the Column entity was cleared.
-func (m *ArticleMutation) ColumnCleared() bool {
-	return m.clearedcolumn
+// NewspaperCleared reports if the "newspaper" edge to the Newspaper entity was cleared.
+func (m *ArticleMutation) NewspaperCleared() bool {
+	return m.clearednewspaper
 }
 
-// ColumnID returns the "column" edge ID in the mutation.
-func (m *ArticleMutation) ColumnID() (id int, exists bool) {
-	if m.column != nil {
-		return *m.column, true
+// NewspaperID returns the "newspaper" edge ID in the mutation.
+func (m *ArticleMutation) NewspaperID() (id int, exists bool) {
+	if m.newspaper != nil {
+		return *m.newspaper, true
 	}
 	return
 }
 
-// ColumnIDs returns the "column" edge IDs in the mutation.
+// NewspaperIDs returns the "newspaper" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ColumnID instead. It exists only for internal usage by the builders.
-func (m *ArticleMutation) ColumnIDs() (ids []int) {
-	if id := m.column; id != nil {
+// NewspaperID instead. It exists only for internal usage by the builders.
+func (m *ArticleMutation) NewspaperIDs() (ids []int) {
+	if id := m.newspaper; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetColumn resets all changes to the "column" edge.
-func (m *ArticleMutation) ResetColumn() {
-	m.column = nil
-	m.clearedcolumn = false
+// ResetNewspaper resets all changes to the "newspaper" edge.
+func (m *ArticleMutation) ResetNewspaper() {
+	m.newspaper = nil
+	m.clearednewspaper = false
 }
 
 // Where appends a list predicates to the ArticleMutation builder.
@@ -725,8 +723,8 @@ func (m *ArticleMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ArticleMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.column != nil {
-		edges = append(edges, article.EdgeColumn)
+	if m.newspaper != nil {
+		edges = append(edges, article.EdgeNewspaper)
 	}
 	return edges
 }
@@ -735,8 +733,8 @@ func (m *ArticleMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ArticleMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case article.EdgeColumn:
-		if id := m.column; id != nil {
+	case article.EdgeNewspaper:
+		if id := m.newspaper; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -758,8 +756,8 @@ func (m *ArticleMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ArticleMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedcolumn {
-		edges = append(edges, article.EdgeColumn)
+	if m.clearednewspaper {
+		edges = append(edges, article.EdgeNewspaper)
 	}
 	return edges
 }
@@ -768,8 +766,8 @@ func (m *ArticleMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ArticleMutation) EdgeCleared(name string) bool {
 	switch name {
-	case article.EdgeColumn:
-		return m.clearedcolumn
+	case article.EdgeNewspaper:
+		return m.clearednewspaper
 	}
 	return false
 }
@@ -778,8 +776,8 @@ func (m *ArticleMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *ArticleMutation) ClearEdge(name string) error {
 	switch name {
-	case article.EdgeColumn:
-		m.ClearColumn()
+	case article.EdgeNewspaper:
+		m.ClearNewspaper()
 		return nil
 	}
 	return fmt.Errorf("unknown Article unique edge %s", name)
@@ -789,615 +787,30 @@ func (m *ArticleMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ArticleMutation) ResetEdge(name string) error {
 	switch name {
-	case article.EdgeColumn:
-		m.ResetColumn()
+	case article.EdgeNewspaper:
+		m.ResetNewspaper()
 		return nil
 	}
 	return fmt.Errorf("unknown Article edge %s", name)
 }
 
-// ColumnMutation represents an operation that mutates the Column nodes in the graph.
-type ColumnMutation struct {
-	config
-	op               Op
-	typ              string
-	id               *int
-	name             *string
-	created_at       *time.Time
-	updated_at       *time.Time
-	clearedFields    map[string]struct{}
-	newspaper        *int
-	clearednewspaper bool
-	articles         map[int]struct{}
-	removedarticles  map[int]struct{}
-	clearedarticles  bool
-	done             bool
-	oldValue         func(context.Context) (*Column, error)
-	predicates       []predicate.Column
-}
-
-var _ ent.Mutation = (*ColumnMutation)(nil)
-
-// columnOption allows management of the mutation configuration using functional options.
-type columnOption func(*ColumnMutation)
-
-// newColumnMutation creates new mutation for the Column entity.
-func newColumnMutation(c config, op Op, opts ...columnOption) *ColumnMutation {
-	m := &ColumnMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeColumn,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withColumnID sets the ID field of the mutation.
-func withColumnID(id int) columnOption {
-	return func(m *ColumnMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Column
-		)
-		m.oldValue = func(ctx context.Context) (*Column, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Column.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withColumn sets the old Column of the mutation.
-func withColumn(node *Column) columnOption {
-	return func(m *ColumnMutation) {
-		m.oldValue = func(context.Context) (*Column, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ColumnMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m ColumnMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *ColumnMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *ColumnMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Column.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetName sets the "name" field.
-func (m *ColumnMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the value of the "name" field in the mutation.
-func (m *ColumnMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldName returns the old "name" field's value of the Column entity.
-// If the Column object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ColumnMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
-	}
-	return oldValue.Name, nil
-}
-
-// ResetName resets all changes to the "name" field.
-func (m *ColumnMutation) ResetName() {
-	m.name = nil
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ColumnMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ColumnMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Column entity.
-// If the Column object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ColumnMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ColumnMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *ColumnMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ColumnMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Column entity.
-// If the Column object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ColumnMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ColumnMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetNewspaperID sets the "newspaper" edge to the Newspaper entity by id.
-func (m *ColumnMutation) SetNewspaperID(id int) {
-	m.newspaper = &id
-}
-
-// ClearNewspaper clears the "newspaper" edge to the Newspaper entity.
-func (m *ColumnMutation) ClearNewspaper() {
-	m.clearednewspaper = true
-}
-
-// NewspaperCleared reports if the "newspaper" edge to the Newspaper entity was cleared.
-func (m *ColumnMutation) NewspaperCleared() bool {
-	return m.clearednewspaper
-}
-
-// NewspaperID returns the "newspaper" edge ID in the mutation.
-func (m *ColumnMutation) NewspaperID() (id int, exists bool) {
-	if m.newspaper != nil {
-		return *m.newspaper, true
-	}
-	return
-}
-
-// NewspaperIDs returns the "newspaper" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// NewspaperID instead. It exists only for internal usage by the builders.
-func (m *ColumnMutation) NewspaperIDs() (ids []int) {
-	if id := m.newspaper; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetNewspaper resets all changes to the "newspaper" edge.
-func (m *ColumnMutation) ResetNewspaper() {
-	m.newspaper = nil
-	m.clearednewspaper = false
-}
-
-// AddArticleIDs adds the "articles" edge to the Article entity by ids.
-func (m *ColumnMutation) AddArticleIDs(ids ...int) {
-	if m.articles == nil {
-		m.articles = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.articles[ids[i]] = struct{}{}
-	}
-}
-
-// ClearArticles clears the "articles" edge to the Article entity.
-func (m *ColumnMutation) ClearArticles() {
-	m.clearedarticles = true
-}
-
-// ArticlesCleared reports if the "articles" edge to the Article entity was cleared.
-func (m *ColumnMutation) ArticlesCleared() bool {
-	return m.clearedarticles
-}
-
-// RemoveArticleIDs removes the "articles" edge to the Article entity by IDs.
-func (m *ColumnMutation) RemoveArticleIDs(ids ...int) {
-	if m.removedarticles == nil {
-		m.removedarticles = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.articles, ids[i])
-		m.removedarticles[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedArticles returns the removed IDs of the "articles" edge to the Article entity.
-func (m *ColumnMutation) RemovedArticlesIDs() (ids []int) {
-	for id := range m.removedarticles {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ArticlesIDs returns the "articles" edge IDs in the mutation.
-func (m *ColumnMutation) ArticlesIDs() (ids []int) {
-	for id := range m.articles {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetArticles resets all changes to the "articles" edge.
-func (m *ColumnMutation) ResetArticles() {
-	m.articles = nil
-	m.clearedarticles = false
-	m.removedarticles = nil
-}
-
-// Where appends a list predicates to the ColumnMutation builder.
-func (m *ColumnMutation) Where(ps ...predicate.Column) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the ColumnMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *ColumnMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Column, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *ColumnMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *ColumnMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (Column).
-func (m *ColumnMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *ColumnMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.name != nil {
-		fields = append(fields, column.FieldName)
-	}
-	if m.created_at != nil {
-		fields = append(fields, column.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, column.FieldUpdatedAt)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *ColumnMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case column.FieldName:
-		return m.Name()
-	case column.FieldCreatedAt:
-		return m.CreatedAt()
-	case column.FieldUpdatedAt:
-		return m.UpdatedAt()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *ColumnMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case column.FieldName:
-		return m.OldName(ctx)
-	case column.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case column.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	}
-	return nil, fmt.Errorf("unknown Column field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ColumnMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case column.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	case column.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case column.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Column field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *ColumnMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *ColumnMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ColumnMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Column numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *ColumnMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *ColumnMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *ColumnMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Column nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *ColumnMutation) ResetField(name string) error {
-	switch name {
-	case column.FieldName:
-		m.ResetName()
-		return nil
-	case column.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case column.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown Column field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *ColumnMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.newspaper != nil {
-		edges = append(edges, column.EdgeNewspaper)
-	}
-	if m.articles != nil {
-		edges = append(edges, column.EdgeArticles)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *ColumnMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case column.EdgeNewspaper:
-		if id := m.newspaper; id != nil {
-			return []ent.Value{*id}
-		}
-	case column.EdgeArticles:
-		ids := make([]ent.Value, 0, len(m.articles))
-		for id := range m.articles {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *ColumnMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedarticles != nil {
-		edges = append(edges, column.EdgeArticles)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *ColumnMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case column.EdgeArticles:
-		ids := make([]ent.Value, 0, len(m.removedarticles))
-		for id := range m.removedarticles {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *ColumnMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearednewspaper {
-		edges = append(edges, column.EdgeNewspaper)
-	}
-	if m.clearedarticles {
-		edges = append(edges, column.EdgeArticles)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *ColumnMutation) EdgeCleared(name string) bool {
-	switch name {
-	case column.EdgeNewspaper:
-		return m.clearednewspaper
-	case column.EdgeArticles:
-		return m.clearedarticles
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *ColumnMutation) ClearEdge(name string) error {
-	switch name {
-	case column.EdgeNewspaper:
-		m.ClearNewspaper()
-		return nil
-	}
-	return fmt.Errorf("unknown Column unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *ColumnMutation) ResetEdge(name string) error {
-	switch name {
-	case column.EdgeNewspaper:
-		m.ResetNewspaper()
-		return nil
-	case column.EdgeArticles:
-		m.ResetArticles()
-		return nil
-	}
-	return fmt.Errorf("unknown Column edge %s", name)
-}
-
 // NewspaperMutation represents an operation that mutates the Newspaper nodes in the graph.
 type NewspaperMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	name           *string
-	created_at     *time.Time
-	updated_at     *time.Time
-	clearedFields  map[string]struct{}
-	columns        map[int]struct{}
-	removedcolumns map[int]struct{}
-	clearedcolumns bool
-	done           bool
-	oldValue       func(context.Context) (*Newspaper, error)
-	predicates     []predicate.Newspaper
+	op              Op
+	typ             string
+	id              *int
+	name            *string
+	column_name     *string
+	created_at      *time.Time
+	updated_at      *time.Time
+	clearedFields   map[string]struct{}
+	articles        map[int]struct{}
+	removedarticles map[int]struct{}
+	clearedarticles bool
+	done            bool
+	oldValue        func(context.Context) (*Newspaper, error)
+	predicates      []predicate.Newspaper
 }
 
 var _ ent.Mutation = (*NewspaperMutation)(nil)
@@ -1534,6 +947,42 @@ func (m *NewspaperMutation) ResetName() {
 	m.name = nil
 }
 
+// SetColumnName sets the "column_name" field.
+func (m *NewspaperMutation) SetColumnName(s string) {
+	m.column_name = &s
+}
+
+// ColumnName returns the value of the "column_name" field in the mutation.
+func (m *NewspaperMutation) ColumnName() (r string, exists bool) {
+	v := m.column_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldColumnName returns the old "column_name" field's value of the Newspaper entity.
+// If the Newspaper object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NewspaperMutation) OldColumnName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldColumnName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldColumnName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldColumnName: %w", err)
+	}
+	return oldValue.ColumnName, nil
+}
+
+// ResetColumnName resets all changes to the "column_name" field.
+func (m *NewspaperMutation) ResetColumnName() {
+	m.column_name = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *NewspaperMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -1606,58 +1055,58 @@ func (m *NewspaperMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// AddColumnIDs adds the "columns" edge to the Column entity by ids.
-func (m *NewspaperMutation) AddColumnIDs(ids ...int) {
-	if m.columns == nil {
-		m.columns = make(map[int]struct{})
+// AddArticleIDs adds the "articles" edge to the Article entity by ids.
+func (m *NewspaperMutation) AddArticleIDs(ids ...int) {
+	if m.articles == nil {
+		m.articles = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.columns[ids[i]] = struct{}{}
+		m.articles[ids[i]] = struct{}{}
 	}
 }
 
-// ClearColumns clears the "columns" edge to the Column entity.
-func (m *NewspaperMutation) ClearColumns() {
-	m.clearedcolumns = true
+// ClearArticles clears the "articles" edge to the Article entity.
+func (m *NewspaperMutation) ClearArticles() {
+	m.clearedarticles = true
 }
 
-// ColumnsCleared reports if the "columns" edge to the Column entity was cleared.
-func (m *NewspaperMutation) ColumnsCleared() bool {
-	return m.clearedcolumns
+// ArticlesCleared reports if the "articles" edge to the Article entity was cleared.
+func (m *NewspaperMutation) ArticlesCleared() bool {
+	return m.clearedarticles
 }
 
-// RemoveColumnIDs removes the "columns" edge to the Column entity by IDs.
-func (m *NewspaperMutation) RemoveColumnIDs(ids ...int) {
-	if m.removedcolumns == nil {
-		m.removedcolumns = make(map[int]struct{})
+// RemoveArticleIDs removes the "articles" edge to the Article entity by IDs.
+func (m *NewspaperMutation) RemoveArticleIDs(ids ...int) {
+	if m.removedarticles == nil {
+		m.removedarticles = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.columns, ids[i])
-		m.removedcolumns[ids[i]] = struct{}{}
+		delete(m.articles, ids[i])
+		m.removedarticles[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedColumns returns the removed IDs of the "columns" edge to the Column entity.
-func (m *NewspaperMutation) RemovedColumnsIDs() (ids []int) {
-	for id := range m.removedcolumns {
+// RemovedArticles returns the removed IDs of the "articles" edge to the Article entity.
+func (m *NewspaperMutation) RemovedArticlesIDs() (ids []int) {
+	for id := range m.removedarticles {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ColumnsIDs returns the "columns" edge IDs in the mutation.
-func (m *NewspaperMutation) ColumnsIDs() (ids []int) {
-	for id := range m.columns {
+// ArticlesIDs returns the "articles" edge IDs in the mutation.
+func (m *NewspaperMutation) ArticlesIDs() (ids []int) {
+	for id := range m.articles {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetColumns resets all changes to the "columns" edge.
-func (m *NewspaperMutation) ResetColumns() {
-	m.columns = nil
-	m.clearedcolumns = false
-	m.removedcolumns = nil
+// ResetArticles resets all changes to the "articles" edge.
+func (m *NewspaperMutation) ResetArticles() {
+	m.articles = nil
+	m.clearedarticles = false
+	m.removedarticles = nil
 }
 
 // Where appends a list predicates to the NewspaperMutation builder.
@@ -1694,9 +1143,12 @@ func (m *NewspaperMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *NewspaperMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.name != nil {
 		fields = append(fields, newspaper.FieldName)
+	}
+	if m.column_name != nil {
+		fields = append(fields, newspaper.FieldColumnName)
 	}
 	if m.created_at != nil {
 		fields = append(fields, newspaper.FieldCreatedAt)
@@ -1714,6 +1166,8 @@ func (m *NewspaperMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case newspaper.FieldName:
 		return m.Name()
+	case newspaper.FieldColumnName:
+		return m.ColumnName()
 	case newspaper.FieldCreatedAt:
 		return m.CreatedAt()
 	case newspaper.FieldUpdatedAt:
@@ -1729,6 +1183,8 @@ func (m *NewspaperMutation) OldField(ctx context.Context, name string) (ent.Valu
 	switch name {
 	case newspaper.FieldName:
 		return m.OldName(ctx)
+	case newspaper.FieldColumnName:
+		return m.OldColumnName(ctx)
 	case newspaper.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case newspaper.FieldUpdatedAt:
@@ -1748,6 +1204,13 @@ func (m *NewspaperMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case newspaper.FieldColumnName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetColumnName(v)
 		return nil
 	case newspaper.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -1815,6 +1278,9 @@ func (m *NewspaperMutation) ResetField(name string) error {
 	case newspaper.FieldName:
 		m.ResetName()
 		return nil
+	case newspaper.FieldColumnName:
+		m.ResetColumnName()
+		return nil
 	case newspaper.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
@@ -1828,8 +1294,8 @@ func (m *NewspaperMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *NewspaperMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.columns != nil {
-		edges = append(edges, newspaper.EdgeColumns)
+	if m.articles != nil {
+		edges = append(edges, newspaper.EdgeArticles)
 	}
 	return edges
 }
@@ -1838,9 +1304,9 @@ func (m *NewspaperMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *NewspaperMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case newspaper.EdgeColumns:
-		ids := make([]ent.Value, 0, len(m.columns))
-		for id := range m.columns {
+	case newspaper.EdgeArticles:
+		ids := make([]ent.Value, 0, len(m.articles))
+		for id := range m.articles {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1851,8 +1317,8 @@ func (m *NewspaperMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *NewspaperMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedcolumns != nil {
-		edges = append(edges, newspaper.EdgeColumns)
+	if m.removedarticles != nil {
+		edges = append(edges, newspaper.EdgeArticles)
 	}
 	return edges
 }
@@ -1861,9 +1327,9 @@ func (m *NewspaperMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *NewspaperMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case newspaper.EdgeColumns:
-		ids := make([]ent.Value, 0, len(m.removedcolumns))
-		for id := range m.removedcolumns {
+	case newspaper.EdgeArticles:
+		ids := make([]ent.Value, 0, len(m.removedarticles))
+		for id := range m.removedarticles {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1874,8 +1340,8 @@ func (m *NewspaperMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *NewspaperMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedcolumns {
-		edges = append(edges, newspaper.EdgeColumns)
+	if m.clearedarticles {
+		edges = append(edges, newspaper.EdgeArticles)
 	}
 	return edges
 }
@@ -1884,8 +1350,8 @@ func (m *NewspaperMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *NewspaperMutation) EdgeCleared(name string) bool {
 	switch name {
-	case newspaper.EdgeColumns:
-		return m.clearedcolumns
+	case newspaper.EdgeArticles:
+		return m.clearedarticles
 	}
 	return false
 }
@@ -1902,8 +1368,8 @@ func (m *NewspaperMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *NewspaperMutation) ResetEdge(name string) error {
 	switch name {
-	case newspaper.EdgeColumns:
-		m.ResetColumns()
+	case newspaper.EdgeArticles:
+		m.ResetArticles()
 		return nil
 	}
 	return fmt.Errorf("unknown Newspaper edge %s", name)

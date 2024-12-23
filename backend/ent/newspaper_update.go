@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/jijimama/newspaper-app/ent/column"
+	"github.com/jijimama/newspaper-app/ent/article"
 	"github.com/jijimama/newspaper-app/ent/newspaper"
 	"github.com/jijimama/newspaper-app/ent/predicate"
 )
@@ -43,6 +43,20 @@ func (nu *NewspaperUpdate) SetNillableName(s *string) *NewspaperUpdate {
 	return nu
 }
 
+// SetColumnName sets the "column_name" field.
+func (nu *NewspaperUpdate) SetColumnName(s string) *NewspaperUpdate {
+	nu.mutation.SetColumnName(s)
+	return nu
+}
+
+// SetNillableColumnName sets the "column_name" field if the given value is not nil.
+func (nu *NewspaperUpdate) SetNillableColumnName(s *string) *NewspaperUpdate {
+	if s != nil {
+		nu.SetColumnName(*s)
+	}
+	return nu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (nu *NewspaperUpdate) SetCreatedAt(t time.Time) *NewspaperUpdate {
 	nu.mutation.SetCreatedAt(t)
@@ -63,19 +77,19 @@ func (nu *NewspaperUpdate) SetUpdatedAt(t time.Time) *NewspaperUpdate {
 	return nu
 }
 
-// AddColumnIDs adds the "columns" edge to the Column entity by IDs.
-func (nu *NewspaperUpdate) AddColumnIDs(ids ...int) *NewspaperUpdate {
-	nu.mutation.AddColumnIDs(ids...)
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (nu *NewspaperUpdate) AddArticleIDs(ids ...int) *NewspaperUpdate {
+	nu.mutation.AddArticleIDs(ids...)
 	return nu
 }
 
-// AddColumns adds the "columns" edges to the Column entity.
-func (nu *NewspaperUpdate) AddColumns(c ...*Column) *NewspaperUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// AddArticles adds the "articles" edges to the Article entity.
+func (nu *NewspaperUpdate) AddArticles(a ...*Article) *NewspaperUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return nu.AddColumnIDs(ids...)
+	return nu.AddArticleIDs(ids...)
 }
 
 // Mutation returns the NewspaperMutation object of the builder.
@@ -83,25 +97,25 @@ func (nu *NewspaperUpdate) Mutation() *NewspaperMutation {
 	return nu.mutation
 }
 
-// ClearColumns clears all "columns" edges to the Column entity.
-func (nu *NewspaperUpdate) ClearColumns() *NewspaperUpdate {
-	nu.mutation.ClearColumns()
+// ClearArticles clears all "articles" edges to the Article entity.
+func (nu *NewspaperUpdate) ClearArticles() *NewspaperUpdate {
+	nu.mutation.ClearArticles()
 	return nu
 }
 
-// RemoveColumnIDs removes the "columns" edge to Column entities by IDs.
-func (nu *NewspaperUpdate) RemoveColumnIDs(ids ...int) *NewspaperUpdate {
-	nu.mutation.RemoveColumnIDs(ids...)
+// RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
+func (nu *NewspaperUpdate) RemoveArticleIDs(ids ...int) *NewspaperUpdate {
+	nu.mutation.RemoveArticleIDs(ids...)
 	return nu
 }
 
-// RemoveColumns removes "columns" edges to Column entities.
-func (nu *NewspaperUpdate) RemoveColumns(c ...*Column) *NewspaperUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// RemoveArticles removes "articles" edges to Article entities.
+func (nu *NewspaperUpdate) RemoveArticles(a ...*Article) *NewspaperUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return nu.RemoveColumnIDs(ids...)
+	return nu.RemoveArticleIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -147,6 +161,11 @@ func (nu *NewspaperUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Newspaper.name": %w`, err)}
 		}
 	}
+	if v, ok := nu.mutation.ColumnName(); ok {
+		if err := newspaper.ColumnNameValidator(v); err != nil {
+			return &ValidationError{Name: "column_name", err: fmt.Errorf(`ent: validator failed for field "Newspaper.column_name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -165,34 +184,37 @@ func (nu *NewspaperUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := nu.mutation.Name(); ok {
 		_spec.SetField(newspaper.FieldName, field.TypeString, value)
 	}
+	if value, ok := nu.mutation.ColumnName(); ok {
+		_spec.SetField(newspaper.FieldColumnName, field.TypeString, value)
+	}
 	if value, ok := nu.mutation.CreatedAt(); ok {
 		_spec.SetField(newspaper.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := nu.mutation.UpdatedAt(); ok {
 		_spec.SetField(newspaper.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if nu.mutation.ColumnsCleared() {
+	if nu.mutation.ArticlesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   newspaper.ColumnsTable,
-			Columns: []string{newspaper.ColumnsColumn},
+			Table:   newspaper.ArticlesTable,
+			Columns: []string{newspaper.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := nu.mutation.RemovedColumnsIDs(); len(nodes) > 0 && !nu.mutation.ColumnsCleared() {
+	if nodes := nu.mutation.RemovedArticlesIDs(); len(nodes) > 0 && !nu.mutation.ArticlesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   newspaper.ColumnsTable,
-			Columns: []string{newspaper.ColumnsColumn},
+			Table:   newspaper.ArticlesTable,
+			Columns: []string{newspaper.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -200,15 +222,15 @@ func (nu *NewspaperUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := nu.mutation.ColumnsIDs(); len(nodes) > 0 {
+	if nodes := nu.mutation.ArticlesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   newspaper.ColumnsTable,
-			Columns: []string{newspaper.ColumnsColumn},
+			Table:   newspaper.ArticlesTable,
+			Columns: []string{newspaper.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -250,6 +272,20 @@ func (nuo *NewspaperUpdateOne) SetNillableName(s *string) *NewspaperUpdateOne {
 	return nuo
 }
 
+// SetColumnName sets the "column_name" field.
+func (nuo *NewspaperUpdateOne) SetColumnName(s string) *NewspaperUpdateOne {
+	nuo.mutation.SetColumnName(s)
+	return nuo
+}
+
+// SetNillableColumnName sets the "column_name" field if the given value is not nil.
+func (nuo *NewspaperUpdateOne) SetNillableColumnName(s *string) *NewspaperUpdateOne {
+	if s != nil {
+		nuo.SetColumnName(*s)
+	}
+	return nuo
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (nuo *NewspaperUpdateOne) SetCreatedAt(t time.Time) *NewspaperUpdateOne {
 	nuo.mutation.SetCreatedAt(t)
@@ -270,19 +306,19 @@ func (nuo *NewspaperUpdateOne) SetUpdatedAt(t time.Time) *NewspaperUpdateOne {
 	return nuo
 }
 
-// AddColumnIDs adds the "columns" edge to the Column entity by IDs.
-func (nuo *NewspaperUpdateOne) AddColumnIDs(ids ...int) *NewspaperUpdateOne {
-	nuo.mutation.AddColumnIDs(ids...)
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (nuo *NewspaperUpdateOne) AddArticleIDs(ids ...int) *NewspaperUpdateOne {
+	nuo.mutation.AddArticleIDs(ids...)
 	return nuo
 }
 
-// AddColumns adds the "columns" edges to the Column entity.
-func (nuo *NewspaperUpdateOne) AddColumns(c ...*Column) *NewspaperUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// AddArticles adds the "articles" edges to the Article entity.
+func (nuo *NewspaperUpdateOne) AddArticles(a ...*Article) *NewspaperUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return nuo.AddColumnIDs(ids...)
+	return nuo.AddArticleIDs(ids...)
 }
 
 // Mutation returns the NewspaperMutation object of the builder.
@@ -290,25 +326,25 @@ func (nuo *NewspaperUpdateOne) Mutation() *NewspaperMutation {
 	return nuo.mutation
 }
 
-// ClearColumns clears all "columns" edges to the Column entity.
-func (nuo *NewspaperUpdateOne) ClearColumns() *NewspaperUpdateOne {
-	nuo.mutation.ClearColumns()
+// ClearArticles clears all "articles" edges to the Article entity.
+func (nuo *NewspaperUpdateOne) ClearArticles() *NewspaperUpdateOne {
+	nuo.mutation.ClearArticles()
 	return nuo
 }
 
-// RemoveColumnIDs removes the "columns" edge to Column entities by IDs.
-func (nuo *NewspaperUpdateOne) RemoveColumnIDs(ids ...int) *NewspaperUpdateOne {
-	nuo.mutation.RemoveColumnIDs(ids...)
+// RemoveArticleIDs removes the "articles" edge to Article entities by IDs.
+func (nuo *NewspaperUpdateOne) RemoveArticleIDs(ids ...int) *NewspaperUpdateOne {
+	nuo.mutation.RemoveArticleIDs(ids...)
 	return nuo
 }
 
-// RemoveColumns removes "columns" edges to Column entities.
-func (nuo *NewspaperUpdateOne) RemoveColumns(c ...*Column) *NewspaperUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// RemoveArticles removes "articles" edges to Article entities.
+func (nuo *NewspaperUpdateOne) RemoveArticles(a ...*Article) *NewspaperUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return nuo.RemoveColumnIDs(ids...)
+	return nuo.RemoveArticleIDs(ids...)
 }
 
 // Where appends a list predicates to the NewspaperUpdate builder.
@@ -367,6 +403,11 @@ func (nuo *NewspaperUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Newspaper.name": %w`, err)}
 		}
 	}
+	if v, ok := nuo.mutation.ColumnName(); ok {
+		if err := newspaper.ColumnNameValidator(v); err != nil {
+			return &ValidationError{Name: "column_name", err: fmt.Errorf(`ent: validator failed for field "Newspaper.column_name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -402,34 +443,37 @@ func (nuo *NewspaperUpdateOne) sqlSave(ctx context.Context) (_node *Newspaper, e
 	if value, ok := nuo.mutation.Name(); ok {
 		_spec.SetField(newspaper.FieldName, field.TypeString, value)
 	}
+	if value, ok := nuo.mutation.ColumnName(); ok {
+		_spec.SetField(newspaper.FieldColumnName, field.TypeString, value)
+	}
 	if value, ok := nuo.mutation.CreatedAt(); ok {
 		_spec.SetField(newspaper.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := nuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(newspaper.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if nuo.mutation.ColumnsCleared() {
+	if nuo.mutation.ArticlesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   newspaper.ColumnsTable,
-			Columns: []string{newspaper.ColumnsColumn},
+			Table:   newspaper.ArticlesTable,
+			Columns: []string{newspaper.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := nuo.mutation.RemovedColumnsIDs(); len(nodes) > 0 && !nuo.mutation.ColumnsCleared() {
+	if nodes := nuo.mutation.RemovedArticlesIDs(); len(nodes) > 0 && !nuo.mutation.ArticlesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   newspaper.ColumnsTable,
-			Columns: []string{newspaper.ColumnsColumn},
+			Table:   newspaper.ArticlesTable,
+			Columns: []string{newspaper.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -437,15 +481,15 @@ func (nuo *NewspaperUpdateOne) sqlSave(ctx context.Context) (_node *Newspaper, e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := nuo.mutation.ColumnsIDs(); len(nodes) > 0 {
+	if nodes := nuo.mutation.ArticlesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   newspaper.ColumnsTable,
-			Columns: []string{newspaper.ColumnsColumn},
+			Table:   newspaper.ArticlesTable,
+			Columns: []string{newspaper.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

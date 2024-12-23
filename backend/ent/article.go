@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/jijimama/newspaper-app/ent/article"
-	"github.com/jijimama/newspaper-app/ent/column"
+	"github.com/jijimama/newspaper-app/ent/newspaper"
 )
 
 // Article is the model entity for the Article schema.
@@ -32,29 +32,29 @@ type Article struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ArticleQuery when eager-loading is set.
-	Edges           ArticleEdges `json:"edges"`
-	column_articles *int
-	selectValues    sql.SelectValues
+	Edges              ArticleEdges `json:"edges"`
+	newspaper_articles *int
+	selectValues       sql.SelectValues
 }
 
 // ArticleEdges holds the relations/edges for other nodes in the graph.
 type ArticleEdges struct {
-	// Column holds the value of the column edge.
-	Column *Column `json:"column,omitempty"`
+	// Newspaper holds the value of the newspaper edge.
+	Newspaper *Newspaper `json:"newspaper,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// ColumnOrErr returns the Column value or an error if the edge
+// NewspaperOrErr returns the Newspaper value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e ArticleEdges) ColumnOrErr() (*Column, error) {
-	if e.Column != nil {
-		return e.Column, nil
+func (e ArticleEdges) NewspaperOrErr() (*Newspaper, error) {
+	if e.Newspaper != nil {
+		return e.Newspaper, nil
 	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: column.Label}
+		return nil, &NotFoundError{label: newspaper.Label}
 	}
-	return nil, &NotLoadedError{edge: "column"}
+	return nil, &NotLoadedError{edge: "newspaper"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -68,7 +68,7 @@ func (*Article) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case article.FieldCreatedAt, article.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case article.ForeignKeys[0]: // column_articles
+		case article.ForeignKeys[0]: // newspaper_articles
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -129,10 +129,10 @@ func (a *Article) assignValues(columns []string, values []any) error {
 			}
 		case article.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field column_articles", value)
+				return fmt.Errorf("unexpected type %T for edge-field newspaper_articles", value)
 			} else if value.Valid {
-				a.column_articles = new(int)
-				*a.column_articles = int(value.Int64)
+				a.newspaper_articles = new(int)
+				*a.newspaper_articles = int(value.Int64)
 			}
 		default:
 			a.selectValues.Set(columns[i], values[i])
@@ -147,9 +147,9 @@ func (a *Article) Value(name string) (ent.Value, error) {
 	return a.selectValues.Get(name)
 }
 
-// QueryColumn queries the "column" edge of the Article entity.
-func (a *Article) QueryColumn() *ColumnQuery {
-	return NewArticleClient(a.config).QueryColumn(a)
+// QueryNewspaper queries the "newspaper" edge of the Article entity.
+func (a *Article) QueryNewspaper() *NewspaperQuery {
+	return NewArticleClient(a.config).QueryNewspaper(a)
 }
 
 // Update returns a builder for updating this Article.

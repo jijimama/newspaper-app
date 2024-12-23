@@ -14,8 +14,6 @@ type Tx struct {
 	config
 	// Article is the client for interacting with the Article builders.
 	Article *ArticleClient
-	// Column is the client for interacting with the Column builders.
-	Column *ColumnClient
 	// Newspaper is the client for interacting with the Newspaper builders.
 	Newspaper *NewspaperClient
 
@@ -150,7 +148,6 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Article = NewArticleClient(tx.config)
-	tx.Column = NewColumnClient(tx.config)
 	tx.Newspaper = NewNewspaperClient(tx.config)
 }
 

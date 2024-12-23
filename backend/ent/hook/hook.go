@@ -21,18 +21,6 @@ func (f ArticleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ArticleMutation", m)
 }
 
-// The ColumnFunc type is an adapter to allow the use of ordinary
-// function as Column mutator.
-type ColumnFunc func(context.Context, *ent.ColumnMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ColumnFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.ColumnMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ColumnMutation", m)
-}
-
 // The NewspaperFunc type is an adapter to allow the use of ordinary
 // function as Newspaper mutator.
 type NewspaperFunc func(context.Context, *ent.NewspaperMutation) (ent.Value, error)

@@ -16,7 +16,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/jijimama/newspaper-app/ent/article"
-	"github.com/jijimama/newspaper-app/ent/column"
 	"github.com/jijimama/newspaper-app/ent/newspaper"
 )
 
@@ -27,8 +26,6 @@ type Client struct {
 	Schema *migrate.Schema
 	// Article is the client for interacting with the Article builders.
 	Article *ArticleClient
-	// Column is the client for interacting with the Column builders.
-	Column *ColumnClient
 	// Newspaper is the client for interacting with the Newspaper builders.
 	Newspaper *NewspaperClient
 }
@@ -43,7 +40,6 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Article = NewArticleClient(c.config)
-	c.Column = NewColumnClient(c.config)
 	c.Newspaper = NewNewspaperClient(c.config)
 }
 
@@ -138,7 +134,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:       ctx,
 		config:    cfg,
 		Article:   NewArticleClient(cfg),
-		Column:    NewColumnClient(cfg),
 		Newspaper: NewNewspaperClient(cfg),
 	}, nil
 }
@@ -160,7 +155,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:       ctx,
 		config:    cfg,
 		Article:   NewArticleClient(cfg),
-		Column:    NewColumnClient(cfg),
 		Newspaper: NewNewspaperClient(cfg),
 	}, nil
 }
@@ -191,7 +185,6 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Article.Use(hooks...)
-	c.Column.Use(hooks...)
 	c.Newspaper.Use(hooks...)
 }
 
@@ -199,7 +192,6 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Article.Intercept(interceptors...)
-	c.Column.Intercept(interceptors...)
 	c.Newspaper.Intercept(interceptors...)
 }
 
@@ -208,8 +200,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *ArticleMutation:
 		return c.Article.mutate(ctx, m)
-	case *ColumnMutation:
-		return c.Column.mutate(ctx, m)
 	case *NewspaperMutation:
 		return c.Newspaper.mutate(ctx, m)
 	default:
@@ -325,15 +315,15 @@ func (c *ArticleClient) GetX(ctx context.Context, id int) *Article {
 	return obj
 }
 
-// QueryColumn queries the column edge of a Article.
-func (c *ArticleClient) QueryColumn(a *Article) *ColumnQuery {
-	query := (&ColumnClient{config: c.config}).Query()
+// QueryNewspaper queries the newspaper edge of a Article.
+func (c *ArticleClient) QueryNewspaper(a *Article) *NewspaperQuery {
+	query := (&NewspaperClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(article.Table, article.FieldID, id),
-			sqlgraph.To(column.Table, column.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, article.ColumnTable, article.ColumnColumn),
+			sqlgraph.To(newspaper.Table, newspaper.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, article.NewspaperTable, article.NewspaperColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
@@ -363,171 +353,6 @@ func (c *ArticleClient) mutate(ctx context.Context, m *ArticleMutation) (Value, 
 		return (&ArticleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Article mutation op: %q", m.Op())
-	}
-}
-
-// ColumnClient is a client for the Column schema.
-type ColumnClient struct {
-	config
-}
-
-// NewColumnClient returns a client for the Column from the given config.
-func NewColumnClient(c config) *ColumnClient {
-	return &ColumnClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `column.Hooks(f(g(h())))`.
-func (c *ColumnClient) Use(hooks ...Hook) {
-	c.hooks.Column = append(c.hooks.Column, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `column.Intercept(f(g(h())))`.
-func (c *ColumnClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Column = append(c.inters.Column, interceptors...)
-}
-
-// Create returns a builder for creating a Column entity.
-func (c *ColumnClient) Create() *ColumnCreate {
-	mutation := newColumnMutation(c.config, OpCreate)
-	return &ColumnCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Column entities.
-func (c *ColumnClient) CreateBulk(builders ...*ColumnCreate) *ColumnCreateBulk {
-	return &ColumnCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *ColumnClient) MapCreateBulk(slice any, setFunc func(*ColumnCreate, int)) *ColumnCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &ColumnCreateBulk{err: fmt.Errorf("calling to ColumnClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*ColumnCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &ColumnCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Column.
-func (c *ColumnClient) Update() *ColumnUpdate {
-	mutation := newColumnMutation(c.config, OpUpdate)
-	return &ColumnUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *ColumnClient) UpdateOne(co *Column) *ColumnUpdateOne {
-	mutation := newColumnMutation(c.config, OpUpdateOne, withColumn(co))
-	return &ColumnUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *ColumnClient) UpdateOneID(id int) *ColumnUpdateOne {
-	mutation := newColumnMutation(c.config, OpUpdateOne, withColumnID(id))
-	return &ColumnUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Column.
-func (c *ColumnClient) Delete() *ColumnDelete {
-	mutation := newColumnMutation(c.config, OpDelete)
-	return &ColumnDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *ColumnClient) DeleteOne(co *Column) *ColumnDeleteOne {
-	return c.DeleteOneID(co.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ColumnClient) DeleteOneID(id int) *ColumnDeleteOne {
-	builder := c.Delete().Where(column.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &ColumnDeleteOne{builder}
-}
-
-// Query returns a query builder for Column.
-func (c *ColumnClient) Query() *ColumnQuery {
-	return &ColumnQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeColumn},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Column entity by its id.
-func (c *ColumnClient) Get(ctx context.Context, id int) (*Column, error) {
-	return c.Query().Where(column.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *ColumnClient) GetX(ctx context.Context, id int) *Column {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryNewspaper queries the newspaper edge of a Column.
-func (c *ColumnClient) QueryNewspaper(co *Column) *NewspaperQuery {
-	query := (&NewspaperClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := co.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(column.Table, column.FieldID, id),
-			sqlgraph.To(newspaper.Table, newspaper.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, column.NewspaperTable, column.NewspaperColumn),
-		)
-		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryArticles queries the articles edge of a Column.
-func (c *ColumnClient) QueryArticles(co *Column) *ArticleQuery {
-	query := (&ArticleClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := co.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(column.Table, column.FieldID, id),
-			sqlgraph.To(article.Table, article.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, column.ArticlesTable, column.ArticlesColumn),
-		)
-		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *ColumnClient) Hooks() []Hook {
-	return c.hooks.Column
-}
-
-// Interceptors returns the client interceptors.
-func (c *ColumnClient) Interceptors() []Interceptor {
-	return c.inters.Column
-}
-
-func (c *ColumnClient) mutate(ctx context.Context, m *ColumnMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&ColumnCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&ColumnUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&ColumnUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&ColumnDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown Column mutation op: %q", m.Op())
 	}
 }
 
@@ -639,15 +464,15 @@ func (c *NewspaperClient) GetX(ctx context.Context, id int) *Newspaper {
 	return obj
 }
 
-// QueryColumns queries the columns edge of a Newspaper.
-func (c *NewspaperClient) QueryColumns(n *Newspaper) *ColumnQuery {
-	query := (&ColumnClient{config: c.config}).Query()
+// QueryArticles queries the articles edge of a Newspaper.
+func (c *NewspaperClient) QueryArticles(n *Newspaper) *ArticleQuery {
+	query := (&ArticleClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := n.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(newspaper.Table, newspaper.FieldID, id),
-			sqlgraph.To(column.Table, column.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, newspaper.ColumnsTable, newspaper.ColumnsColumn),
+			sqlgraph.To(article.Table, article.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, newspaper.ArticlesTable, newspaper.ArticlesColumn),
 		)
 		fromV = sqlgraph.Neighbors(n.driver.Dialect(), step)
 		return fromV, nil
@@ -683,9 +508,9 @@ func (c *NewspaperClient) mutate(ctx context.Context, m *NewspaperMutation) (Val
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Article, Column, Newspaper []ent.Hook
+		Article, Newspaper []ent.Hook
 	}
 	inters struct {
-		Article, Column, Newspaper []ent.Interceptor
+		Article, Newspaper []ent.Interceptor
 	}
 )

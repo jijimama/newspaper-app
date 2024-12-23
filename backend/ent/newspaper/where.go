@@ -60,6 +60,11 @@ func Name(v string) predicate.Newspaper {
 	return predicate.Newspaper(sql.FieldEQ(FieldName, v))
 }
 
+// ColumnName applies equality check predicate on the "column_name" field. It's identical to ColumnNameEQ.
+func ColumnName(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldEQ(FieldColumnName, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Newspaper {
 	return predicate.Newspaper(sql.FieldEQ(FieldCreatedAt, v))
@@ -133,6 +138,71 @@ func NameEqualFold(v string) predicate.Newspaper {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Newspaper {
 	return predicate.Newspaper(sql.FieldContainsFold(FieldName, v))
+}
+
+// ColumnNameEQ applies the EQ predicate on the "column_name" field.
+func ColumnNameEQ(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldEQ(FieldColumnName, v))
+}
+
+// ColumnNameNEQ applies the NEQ predicate on the "column_name" field.
+func ColumnNameNEQ(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldNEQ(FieldColumnName, v))
+}
+
+// ColumnNameIn applies the In predicate on the "column_name" field.
+func ColumnNameIn(vs ...string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldIn(FieldColumnName, vs...))
+}
+
+// ColumnNameNotIn applies the NotIn predicate on the "column_name" field.
+func ColumnNameNotIn(vs ...string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldNotIn(FieldColumnName, vs...))
+}
+
+// ColumnNameGT applies the GT predicate on the "column_name" field.
+func ColumnNameGT(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldGT(FieldColumnName, v))
+}
+
+// ColumnNameGTE applies the GTE predicate on the "column_name" field.
+func ColumnNameGTE(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldGTE(FieldColumnName, v))
+}
+
+// ColumnNameLT applies the LT predicate on the "column_name" field.
+func ColumnNameLT(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldLT(FieldColumnName, v))
+}
+
+// ColumnNameLTE applies the LTE predicate on the "column_name" field.
+func ColumnNameLTE(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldLTE(FieldColumnName, v))
+}
+
+// ColumnNameContains applies the Contains predicate on the "column_name" field.
+func ColumnNameContains(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldContains(FieldColumnName, v))
+}
+
+// ColumnNameHasPrefix applies the HasPrefix predicate on the "column_name" field.
+func ColumnNameHasPrefix(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldHasPrefix(FieldColumnName, v))
+}
+
+// ColumnNameHasSuffix applies the HasSuffix predicate on the "column_name" field.
+func ColumnNameHasSuffix(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldHasSuffix(FieldColumnName, v))
+}
+
+// ColumnNameEqualFold applies the EqualFold predicate on the "column_name" field.
+func ColumnNameEqualFold(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldEqualFold(FieldColumnName, v))
+}
+
+// ColumnNameContainsFold applies the ContainsFold predicate on the "column_name" field.
+func ColumnNameContainsFold(v string) predicate.Newspaper {
+	return predicate.Newspaper(sql.FieldContainsFold(FieldColumnName, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -215,21 +285,21 @@ func UpdatedAtLTE(v time.Time) predicate.Newspaper {
 	return predicate.Newspaper(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
-// HasColumns applies the HasEdge predicate on the "columns" edge.
-func HasColumns() predicate.Newspaper {
+// HasArticles applies the HasEdge predicate on the "articles" edge.
+func HasArticles() predicate.Newspaper {
 	return predicate.Newspaper(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ColumnsTable, ColumnsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasColumnsWith applies the HasEdge predicate on the "columns" edge with a given conditions (other predicates).
-func HasColumnsWith(preds ...predicate.Column) predicate.Newspaper {
+// HasArticlesWith applies the HasEdge predicate on the "articles" edge with a given conditions (other predicates).
+func HasArticlesWith(preds ...predicate.Article) predicate.Newspaper {
 	return predicate.Newspaper(func(s *sql.Selector) {
-		step := newColumnsStep()
+		step := newArticlesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

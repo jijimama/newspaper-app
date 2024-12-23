@@ -350,21 +350,21 @@ func UpdatedAtLTE(v time.Time) predicate.Article {
 	return predicate.Article(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
-// HasColumn applies the HasEdge predicate on the "column" edge.
-func HasColumn() predicate.Article {
+// HasNewspaper applies the HasEdge predicate on the "newspaper" edge.
+func HasNewspaper() predicate.Article {
 	return predicate.Article(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ColumnTable, ColumnColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, NewspaperTable, NewspaperColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasColumnWith applies the HasEdge predicate on the "column" edge with a given conditions (other predicates).
-func HasColumnWith(preds ...predicate.Column) predicate.Article {
+// HasNewspaperWith applies the HasEdge predicate on the "newspaper" edge with a given conditions (other predicates).
+func HasNewspaperWith(preds ...predicate.Newspaper) predicate.Article {
 	return predicate.Article(func(s *sql.Selector) {
-		step := newColumnStep()
+		step := newNewspaperStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

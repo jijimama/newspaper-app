@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/jijimama/newspaper-app/ent/article"
-	"github.com/jijimama/newspaper-app/ent/column"
 	"github.com/jijimama/newspaper-app/ent/newspaper"
 	"github.com/jijimama/newspaper-app/ent/schema"
 )
@@ -43,34 +42,22 @@ func init() {
 	article.DefaultUpdatedAt = articleDescUpdatedAt.Default.(func() time.Time)
 	// article.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	article.UpdateDefaultUpdatedAt = articleDescUpdatedAt.UpdateDefault.(func() time.Time)
-	columnFields := schema.Column{}.Fields()
-	_ = columnFields
-	// columnDescName is the schema descriptor for name field.
-	columnDescName := columnFields[0].Descriptor()
-	// column.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	column.NameValidator = columnDescName.Validators[0].(func(string) error)
-	// columnDescCreatedAt is the schema descriptor for created_at field.
-	columnDescCreatedAt := columnFields[1].Descriptor()
-	// column.DefaultCreatedAt holds the default value on creation for the created_at field.
-	column.DefaultCreatedAt = columnDescCreatedAt.Default.(func() time.Time)
-	// columnDescUpdatedAt is the schema descriptor for updated_at field.
-	columnDescUpdatedAt := columnFields[2].Descriptor()
-	// column.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	column.DefaultUpdatedAt = columnDescUpdatedAt.Default.(func() time.Time)
-	// column.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	column.UpdateDefaultUpdatedAt = columnDescUpdatedAt.UpdateDefault.(func() time.Time)
 	newspaperFields := schema.Newspaper{}.Fields()
 	_ = newspaperFields
 	// newspaperDescName is the schema descriptor for name field.
 	newspaperDescName := newspaperFields[0].Descriptor()
 	// newspaper.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	newspaper.NameValidator = newspaperDescName.Validators[0].(func(string) error)
+	// newspaperDescColumnName is the schema descriptor for column_name field.
+	newspaperDescColumnName := newspaperFields[1].Descriptor()
+	// newspaper.ColumnNameValidator is a validator for the "column_name" field. It is called by the builders before save.
+	newspaper.ColumnNameValidator = newspaperDescColumnName.Validators[0].(func(string) error)
 	// newspaperDescCreatedAt is the schema descriptor for created_at field.
-	newspaperDescCreatedAt := newspaperFields[1].Descriptor()
+	newspaperDescCreatedAt := newspaperFields[2].Descriptor()
 	// newspaper.DefaultCreatedAt holds the default value on creation for the created_at field.
 	newspaper.DefaultCreatedAt = newspaperDescCreatedAt.Default.(func() time.Time)
 	// newspaperDescUpdatedAt is the schema descriptor for updated_at field.
-	newspaperDescUpdatedAt := newspaperFields[2].Descriptor()
+	newspaperDescUpdatedAt := newspaperFields[3].Descriptor()
 	// newspaper.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	newspaper.DefaultUpdatedAt = newspaperDescUpdatedAt.Default.(func() time.Time)
 	// newspaper.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

@@ -18,6 +18,8 @@ func (Newspaper) Fields() []ent.Field {
 		field.String("name").
 			NotEmpty().
 			Unique(),
+		field.String("column_name").
+			NotEmpty(),
 		field.Time("created_at").
 			Default(time.Now),
 		field.Time("updated_at").
@@ -29,6 +31,6 @@ func (Newspaper) Fields() []ent.Field {
 // Edges of the Newspaper.
 func (Newspaper) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("columns", Column.Type),
+		edge.To("articles", Article.Type),
 	}
 }

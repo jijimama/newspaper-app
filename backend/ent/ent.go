@@ -75,7 +75,6 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			article.Table:   article.ValidColumn,
-			column.Table:    column.ValidColumn,
 			newspaper.Table: newspaper.ValidColumn,
 		})
 	})

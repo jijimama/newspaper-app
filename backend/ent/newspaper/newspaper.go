@@ -16,27 +16,30 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldColumnName holds the string denoting the column_name field in the database.
+	FieldColumnName = "column_name"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// EdgeColumns holds the string denoting the columns edge name in mutations.
-	EdgeColumns = "columns"
+	// EdgeArticles holds the string denoting the articles edge name in mutations.
+	EdgeArticles = "articles"
 	// Table holds the table name of the newspaper in the database.
 	Table = "newspapers"
-	// ColumnsTable is the table that holds the columns relation/edge.
-	ColumnsTable = "columns"
-	// ColumnsInverseTable is the table name for the Column entity.
-	// It exists in this package in order to avoid circular dependency with the "column" package.
-	ColumnsInverseTable = "columns"
-	// ColumnsColumn is the table column denoting the columns relation/edge.
-	ColumnsColumn = "newspaper_columns"
+	// ArticlesTable is the table that holds the articles relation/edge.
+	ArticlesTable = "articles"
+	// ArticlesInverseTable is the table name for the Article entity.
+	// It exists in this package in order to avoid circular dependency with the "article" package.
+	ArticlesInverseTable = "articles"
+	// ArticlesColumn is the table column denoting the articles relation/edge.
+	ArticlesColumn = "newspaper_articles"
 )
 
 // Columns holds all SQL columns for newspaper fields.
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldColumnName,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -54,6 +57,8 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// ColumnNameValidator is a validator for the "column_name" field. It is called by the builders before save.
+	ColumnNameValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -75,6 +80,11 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
+// ByColumnName orders the results by the column_name field.
+func ByColumnName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldColumnName, opts...).ToFunc()
+}
+
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
@@ -85,23 +95,23 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByColumnsCount orders the results by columns count.
-func ByColumnsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByArticlesCount orders the results by articles count.
+func ByArticlesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newColumnsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newArticlesStep(), opts...)
 	}
 }
 
-// ByColumns orders the results by columns terms.
-func ByColumns(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByArticles orders the results by articles terms.
+func ByArticles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newColumnsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newArticlesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newColumnsStep() *sqlgraph.Step {
+func newArticlesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ColumnsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, ColumnsTable, ColumnsColumn),
+		sqlgraph.To(ArticlesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ArticlesTable, ArticlesColumn),
 	)
 }

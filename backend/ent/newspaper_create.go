@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/jijimama/newspaper-app/ent/column"
+	"github.com/jijimama/newspaper-app/ent/article"
 	"github.com/jijimama/newspaper-app/ent/newspaper"
 )
 
@@ -24,6 +24,12 @@ type NewspaperCreate struct {
 // SetName sets the "name" field.
 func (nc *NewspaperCreate) SetName(s string) *NewspaperCreate {
 	nc.mutation.SetName(s)
+	return nc
+}
+
+// SetColumnName sets the "column_name" field.
+func (nc *NewspaperCreate) SetColumnName(s string) *NewspaperCreate {
+	nc.mutation.SetColumnName(s)
 	return nc
 }
 
@@ -55,19 +61,19 @@ func (nc *NewspaperCreate) SetNillableUpdatedAt(t *time.Time) *NewspaperCreate {
 	return nc
 }
 
-// AddColumnIDs adds the "columns" edge to the Column entity by IDs.
-func (nc *NewspaperCreate) AddColumnIDs(ids ...int) *NewspaperCreate {
-	nc.mutation.AddColumnIDs(ids...)
+// AddArticleIDs adds the "articles" edge to the Article entity by IDs.
+func (nc *NewspaperCreate) AddArticleIDs(ids ...int) *NewspaperCreate {
+	nc.mutation.AddArticleIDs(ids...)
 	return nc
 }
 
-// AddColumns adds the "columns" edges to the Column entity.
-func (nc *NewspaperCreate) AddColumns(c ...*Column) *NewspaperCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// AddArticles adds the "articles" edges to the Article entity.
+func (nc *NewspaperCreate) AddArticles(a ...*Article) *NewspaperCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return nc.AddColumnIDs(ids...)
+	return nc.AddArticleIDs(ids...)
 }
 
 // Mutation returns the NewspaperMutation object of the builder.
@@ -125,6 +131,14 @@ func (nc *NewspaperCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Newspaper.name": %w`, err)}
 		}
 	}
+	if _, ok := nc.mutation.ColumnName(); !ok {
+		return &ValidationError{Name: "column_name", err: errors.New(`ent: missing required field "Newspaper.column_name"`)}
+	}
+	if v, ok := nc.mutation.ColumnName(); ok {
+		if err := newspaper.ColumnNameValidator(v); err != nil {
+			return &ValidationError{Name: "column_name", err: fmt.Errorf(`ent: validator failed for field "Newspaper.column_name": %w`, err)}
+		}
+	}
 	if _, ok := nc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Newspaper.created_at"`)}
 	}
@@ -161,6 +175,10 @@ func (nc *NewspaperCreate) createSpec() (*Newspaper, *sqlgraph.CreateSpec) {
 		_spec.SetField(newspaper.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := nc.mutation.ColumnName(); ok {
+		_spec.SetField(newspaper.FieldColumnName, field.TypeString, value)
+		_node.ColumnName = value
+	}
 	if value, ok := nc.mutation.CreatedAt(); ok {
 		_spec.SetField(newspaper.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -169,15 +187,15 @@ func (nc *NewspaperCreate) createSpec() (*Newspaper, *sqlgraph.CreateSpec) {
 		_spec.SetField(newspaper.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := nc.mutation.ColumnsIDs(); len(nodes) > 0 {
+	if nodes := nc.mutation.ArticlesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   newspaper.ColumnsTable,
-			Columns: []string{newspaper.ColumnsColumn},
+			Table:   newspaper.ArticlesTable,
+			Columns: []string{newspaper.ArticlesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(article.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

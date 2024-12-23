@@ -9,8 +9,5 @@ import (
 // Article is the predicate function for article builders.
 type Article func(*sql.Selector)
 
-// Column is the predicate function for column builders.
-type Column func(*sql.Selector)
-
 // Newspaper is the predicate function for newspaper builders.
 type Newspaper func(*sql.Selector)

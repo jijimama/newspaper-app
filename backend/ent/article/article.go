@@ -26,17 +26,17 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// EdgeColumn holds the string denoting the column edge name in mutations.
-	EdgeColumn = "column"
+	// EdgeNewspaper holds the string denoting the newspaper edge name in mutations.
+	EdgeNewspaper = "newspaper"
 	// Table holds the table name of the article in the database.
 	Table = "articles"
-	// ColumnTable is the table that holds the column relation/edge.
-	ColumnTable = "articles"
-	// ColumnInverseTable is the table name for the Column entity.
-	// It exists in this package in order to avoid circular dependency with the "column" package.
-	ColumnInverseTable = "columns"
-	// ColumnColumn is the table column denoting the column relation/edge.
-	ColumnColumn = "column_articles"
+	// NewspaperTable is the table that holds the newspaper relation/edge.
+	NewspaperTable = "articles"
+	// NewspaperInverseTable is the table name for the Newspaper entity.
+	// It exists in this package in order to avoid circular dependency with the "newspaper" package.
+	NewspaperInverseTable = "newspapers"
+	// NewspaperColumn is the table column denoting the newspaper relation/edge.
+	NewspaperColumn = "newspaper_articles"
 )
 
 // Columns holds all SQL columns for article fields.
@@ -53,7 +53,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "articles"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"column_articles",
+	"newspaper_articles",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -126,16 +126,16 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByColumnField orders the results by column field.
-func ByColumnField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByNewspaperField orders the results by newspaper field.
+func ByNewspaperField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newColumnStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newNewspaperStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newColumnStep() *sqlgraph.Step {
+func newNewspaperStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ColumnInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, ColumnTable, ColumnColumn),
+		sqlgraph.To(NewspaperInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, NewspaperTable, NewspaperColumn),
 	)
 }

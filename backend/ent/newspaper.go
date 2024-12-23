@@ -19,6 +19,8 @@ type Newspaper struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// ColumnName holds the value of the "column_name" field.
+	ColumnName string `json:"column_name,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -31,20 +33,20 @@ type Newspaper struct {
 
 // NewspaperEdges holds the relations/edges for other nodes in the graph.
 type NewspaperEdges struct {
-	// Columns holds the value of the columns edge.
-	Columns []*Column `json:"columns,omitempty"`
+	// Articles holds the value of the articles edge.
+	Articles []*Article `json:"articles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// ColumnsOrErr returns the Columns value or an error if the edge
+// ArticlesOrErr returns the Articles value or an error if the edge
 // was not loaded in eager-loading.
-func (e NewspaperEdges) ColumnsOrErr() ([]*Column, error) {
+func (e NewspaperEdges) ArticlesOrErr() ([]*Article, error) {
 	if e.loadedTypes[0] {
-		return e.Columns, nil
+		return e.Articles, nil
 	}
-	return nil, &NotLoadedError{edge: "columns"}
+	return nil, &NotLoadedError{edge: "articles"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -54,7 +56,7 @@ func (*Newspaper) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case newspaper.FieldID:
 			values[i] = new(sql.NullInt64)
-		case newspaper.FieldName:
+		case newspaper.FieldName, newspaper.FieldColumnName:
 			values[i] = new(sql.NullString)
 		case newspaper.FieldCreatedAt, newspaper.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -85,6 +87,12 @@ func (n *Newspaper) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				n.Name = value.String
 			}
+		case newspaper.FieldColumnName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field column_name", values[i])
+			} else if value.Valid {
+				n.ColumnName = value.String
+			}
 		case newspaper.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -110,9 +118,9 @@ func (n *Newspaper) Value(name string) (ent.Value, error) {
 	return n.selectValues.Get(name)
 }
 
-// QueryColumns queries the "columns" edge of the Newspaper entity.
-func (n *Newspaper) QueryColumns() *ColumnQuery {
-	return NewNewspaperClient(n.config).QueryColumns(n)
+// QueryArticles queries the "articles" edge of the Newspaper entity.
+func (n *Newspaper) QueryArticles() *ArticleQuery {
+	return NewNewspaperClient(n.config).QueryArticles(n)
 }
 
 // Update returns a builder for updating this Newspaper.
@@ -140,6 +148,9 @@ func (n *Newspaper) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
 	builder.WriteString("name=")
 	builder.WriteString(n.Name)
+	builder.WriteString(", ")
+	builder.WriteString("column_name=")
+	builder.WriteString(n.ColumnName)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(n.CreatedAt.Format(time.ANSIC))

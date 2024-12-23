@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/jijimama/newspaper-app/ent/article"
-	"github.com/jijimama/newspaper-app/ent/column"
+	"github.com/jijimama/newspaper-app/ent/newspaper"
 )
 
 // ArticleCreate is the builder for creating a Article entity.
@@ -73,23 +73,23 @@ func (ac *ArticleCreate) SetNillableUpdatedAt(t *time.Time) *ArticleCreate {
 	return ac
 }
 
-// SetColumnID sets the "column" edge to the Column entity by ID.
-func (ac *ArticleCreate) SetColumnID(id int) *ArticleCreate {
-	ac.mutation.SetColumnID(id)
+// SetNewspaperID sets the "newspaper" edge to the Newspaper entity by ID.
+func (ac *ArticleCreate) SetNewspaperID(id int) *ArticleCreate {
+	ac.mutation.SetNewspaperID(id)
 	return ac
 }
 
-// SetNillableColumnID sets the "column" edge to the Column entity by ID if the given value is not nil.
-func (ac *ArticleCreate) SetNillableColumnID(id *int) *ArticleCreate {
+// SetNillableNewspaperID sets the "newspaper" edge to the Newspaper entity by ID if the given value is not nil.
+func (ac *ArticleCreate) SetNillableNewspaperID(id *int) *ArticleCreate {
 	if id != nil {
-		ac = ac.SetColumnID(*id)
+		ac = ac.SetNewspaperID(*id)
 	}
 	return ac
 }
 
-// SetColumn sets the "column" edge to the Column entity.
-func (ac *ArticleCreate) SetColumn(c *Column) *ArticleCreate {
-	return ac.SetColumnID(c.ID)
+// SetNewspaper sets the "newspaper" edge to the Newspaper entity.
+func (ac *ArticleCreate) SetNewspaper(n *Newspaper) *ArticleCreate {
+	return ac.SetNewspaperID(n.ID)
 }
 
 // Mutation returns the ArticleMutation object of the builder.
@@ -227,21 +227,21 @@ func (ac *ArticleCreate) createSpec() (*Article, *sqlgraph.CreateSpec) {
 		_spec.SetField(article.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := ac.mutation.ColumnIDs(); len(nodes) > 0 {
+	if nodes := ac.mutation.NewspaperIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   article.ColumnTable,
-			Columns: []string{article.ColumnColumn},
+			Table:   article.NewspaperTable,
+			Columns: []string{article.NewspaperColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(column.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(newspaper.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.column_articles = &nodes[0]
+		_node.newspaper_articles = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
