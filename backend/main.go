@@ -1,14 +1,25 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"net/http"
 	"context"
 	"log"
 	"os"
+
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/jijimama/newspaper-app/ent"
 	_ "github.com/lib/pq"
 )
+
+type Article struct {
+    Year      int    `json:"year"`
+    Month     int    `json:"month"`
+    Day       int    `json:"day"`
+    Content   string `json:"content"`
+	Newspaper string `json:"newspaper"`
+	ColumnName string `json:"column_name"`
+}
 
 func main() {
 	router := gin.Default()
@@ -46,5 +57,35 @@ func main() {
 		})
   	})
 
+	router.GET("/articles", func(c *gin.Context) {
+        articles, err := getArticles(client)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "failed querying articles"})
+            return
+        }
+        c.JSON(http.StatusOK, articles)
+    })
+
   	router.Run(":8080")
+}
+
+func getArticles(client *ent.Client) ([]Article, error) {
+    articles, err := client.Article.Query().WithNewspaper().All(context.Background())
+    if err != nil {
+        return nil, err
+    }
+
+    result := make([]Article, len(articles))
+    for i, a := range articles {
+        result[i] = Article{
+            Year:       a.Year,
+            Month:      a.Month,
+            Day:        a.Day,
+            Content:    a.Content,
+            Newspaper:  a.Edges.Newspaper.Name,
+			ColumnName: a.Edges.Newspaper.ColumnName,
+        }
+    }
+
+    return result, nil
 }
