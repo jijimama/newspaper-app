@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"context"
-	"encoding/csv"
 	"log"
 	"os"
 	"github.com/joho/godotenv"
@@ -40,12 +39,6 @@ func main() {
 	if err := client.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
-
-	// CSVファイルからデータを読み込み、データベースに挿入
-    err = loadCSVData(client, "data/newspapers.csv")
-    if err != nil {
-        log.Fatalf("failed loading CSV data: %v", err)
-    }
 	
   	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -54,34 +47,4 @@ func main() {
   	})
 
   	router.Run(":8080")
-}
-
-func loadCSVData(client *ent.Client, filePath string) error {
-    file, err := os.Open(filePath)
-    if err != nil {
-        return err
-    }
-    defer file.Close()
-
-    reader := csv.NewReader(file)
-    records, err := reader.ReadAll()
-    if err != nil {
-        return err
-    }
-
-    for _, record := range records {
-        name := record[0]
-        columnName := record[1]
-
-        _, err := client.Newspaper.
-            Create().
-            SetName(name).
-            SetColumnName(columnName).
-            Save(context.Background())
-        if err != nil {
-            return err
-        }
-    }
-
-    return nil
 }
