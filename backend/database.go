@@ -10,15 +10,18 @@ import (
 
 func initDB() (*ent.Client, error) {
     // 環境変数から取得
-    dbHost := os.Getenv("DB_HOST")
-    dbPort := os.Getenv("DB_PORT")
-    dbUser := os.Getenv("DB_USER")
-    dbName := os.Getenv("DB_NAME")
-    dbPassword := os.Getenv("DB_PASSWORD")
+    dsn := os.Getenv("DATABASE_URL")
+    if dsn == "" {
+        // 環境変数が設定されていない場合、個別の環境変数から取得
+        dbHost := os.Getenv("DB_HOST")
+        dbPort := os.Getenv("DB_PORT")
+        dbUser := os.Getenv("DB_USER")
+        dbName := os.Getenv("DB_NAME")
+        dbPassword := os.Getenv("DB_PASSWORD")
 
-    // 接続文字列を作成
-    dsn := "host=" + dbHost + " port=" + dbPort + " user=" + dbUser + " dbname=" + dbName + " password=" + dbPassword + " sslmode=disable"
-
+        // 接続文字列を作成
+        dsn = "host=" + dbHost + " port=" + dbPort + " user=" + dbUser + " dbname=" + dbName + " password=" + dbPassword + " sslmode=disable"
+    }
     // PostgreSQLに接続
     client, err := ent.Open("postgres", dsn)
     if err != nil {

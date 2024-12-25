@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"flag"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -19,6 +20,13 @@ func main() {
         RunBatch(*newspaperName, *csvFilePath)
         return
     }
+
+	// GIN_MODE 環境変数を設定
+    ginMode := os.Getenv("GIN_MODE")
+    if ginMode == "" {
+        ginMode = "debug" // デフォルトは "debug"
+    }
+    gin.SetMode(ginMode)
 
 	router := gin.Default()
 
