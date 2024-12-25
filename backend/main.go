@@ -25,16 +25,15 @@ func main() {
     ginMode := os.Getenv("GIN_MODE")
     if ginMode == "" {
         ginMode = "debug" // デフォルトは "debug"
+		// .envファイルを読み込む
+		err := godotenv.Load()
+		if err != nil {
+			log.Printf("Error loading .env file: %v", err)
+		}
     }
     gin.SetMode(ginMode)
 
 	router := gin.Default()
-
-	// .envファイルを読み込む
-	err := godotenv.Load()
-	if err != nil {
-		log.Printf("Error loading .env file: %v", err)
-	}
 
 	// データベース接続を初期化
     client, err := initDB()
