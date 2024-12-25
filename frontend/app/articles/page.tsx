@@ -11,11 +11,21 @@ type Article = {
 };
 
 async function fetchArticles(): Promise<Article[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/articles`, { cache: 'no-store' });
-  if (!res.ok) {
-    throw new Error('Failed to fetch articles');
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) {
+    throw new Error('NEXT_PUBLIC_API_URL is not defined');
   }
-  return res.json();
+  try {
+    const res = await fetch(`${apiUrl}/articles`, { cache: 'no-store' });
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Failed to fetch articles: ${res.status} ${res.statusText} - ${errorText}`);
+    }
+    return res.json();
+  } catch (error) {
+    console.error('Error fetching articles:', error);
+    throw error;
+  }
 }
 
 const ArticlesPage = async () => {
