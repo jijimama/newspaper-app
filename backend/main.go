@@ -33,7 +33,7 @@ func main() {
 	// .envファイルを読み込む
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Printf("Error loading .env file: %v", err)
 	}
 
 	// データベース接続を初期化
