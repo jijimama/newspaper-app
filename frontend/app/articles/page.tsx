@@ -12,6 +12,7 @@ type Article = {
 
 async function fetchArticles(): Promise<Article[]> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  console.log('API URL:', apiUrl); // 環境変数を確認するために追加
   if (!apiUrl) {
     throw new Error('NEXT_PUBLIC_API_URL is not defined');
   }
