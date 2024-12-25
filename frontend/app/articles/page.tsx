@@ -11,7 +11,7 @@ type Article = {
 };
 
 async function fetchArticles(): Promise<Article[]> {
-  const res = await fetch('http://backend:8080/articles');
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/articles`, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error('Failed to fetch articles');
   }
