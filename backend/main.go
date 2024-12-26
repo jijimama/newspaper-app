@@ -2,55 +2,36 @@ package main
 
 import (
 	"log"
-	"flag"
-	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
+	"github.com/jijimama/newspaper-app/config"
+	"github.com/jijimama/newspaper-app/infrastructure/database"
+	"github.com/jijimama/newspaper-app/adapter/controller"
+    "github.com/jijimama/newspaper-app/adapter/gateway"
+	"github.com/jijimama/newspaper-app/adapter/router"
+    "github.com/jijimama/newspaper-app/usecase"
 )
 
 func main() {
-	// コマンドライン引数を解析
-    runBatch := flag.Bool("batch", false, "Run batch process")
-	newspaperName := flag.String("newspaper", "", "Name of the newspaper")
-    csvFilePath := flag.String("csv", "data/articles/mainichi.csv", "Path to the CSV file")
-    flag.Parse()
-
-    if *runBatch {
-        RunBatch(*newspaperName, *csvFilePath)
-        return
-    }
-
-	// GIN_MODE 環境変数を設定
-    ginMode := os.Getenv("GIN_MODE")
-    if ginMode == "" {
-        ginMode = "debug" // デフォルトは "debug"
-		// .envファイルを読み込む
-		err := godotenv.Load()
-		if err != nil {
-			log.Printf("Error loading .env file: %v", err)
-		}
-    }
-    gin.SetMode(ginMode)
-
-	router := gin.Default()
-
+	// 設定を読み込む
+    cfg := config.LoadConfig()
+	// GIN_MODE を設定
+    gin.SetMode(cfg.GinMode)
 	// データベース接続を初期化
-    client, err := initDB()
+    client, err := database.NewDatabaseSQLFactory(database.InstancePostgres)
     if err != nil {
-        log.Fatalf("failed opening connection to postgres: %v", err)
+        log.Fatalf("failed opening connection to database: %v", err)
     }
-	defer client.Close()
+    defer client.Close()
 
-  	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-      		"message": "Hello, World!",
-		})
-  	})
+	// ゲートウェイ、ユースケース、コントローラーを初期化
+    articleRepo := gateway.NewArticleGateway(client)
+    articleUsecase := usecase.NewArticleUsecase(articleRepo)
+    articleController := controller.NewArticleController(articleUsecase)
 
-	router.GET("/articles", func(c *gin.Context) {
-        getArticlesHandler(c, client)
-    })
+	// ルーターを設定
+    r := router.NewRouter(articleController)
 
-  	router.Run(":8080")
+	// サーバーを起動
+	r.Run(":8080")
 }
