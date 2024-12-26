@@ -15,7 +15,7 @@ func initDB() (*ent.Client, error) {
     dbName := os.Getenv("DB_NAME")
     dbPassword := os.Getenv("DB_PASSWORD")
     // 接続文字列を作成
-    dsn = "host=" + dbHost + " port=" + dbPort + " user=" + dbUser + " dbname=" + dbName + " password=" + dbPassword + " sslmode=disable"
+    dsn := "host=" + dbHost + " port=" + dbPort + " user=" + dbUser + " dbname=" + dbName + " password=" + dbPassword + " sslmode=disable"
     // PostgreSQLに接続
     client, err := ent.Open("postgres", dsn)
     if err != nil {
