@@ -25,8 +25,8 @@ func main() {
     defer client.Close()
 
 	// ゲートウェイ、ユースケース、コントローラーを初期化
-    articleRepo := gateway.NewArticleGateway(client)
-    articleUsecase := usecase.NewArticleUsecase(articleRepo)
+    articleRepository := gateway.NewArticleRepository(client)
+    articleUsecase := usecase.NewArticleUseCase(articleRepository)
     articleController := controller.NewArticleController(articleUsecase)
 
 	// ルーターを設定

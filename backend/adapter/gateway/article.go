@@ -7,28 +7,32 @@ import (
     "github.com/jijimama/newspaper-app/ent"
 )
 
-// ArticleGateway は記事データをデータベースから取得するゲートウェイ。
-type ArticleGateway struct {
+// ArticleRepository は記事データをデータベースから取得するリポジトリインターフェース。
+type ArticleRepository interface {
+    GetArticles(ctx context.Context) ([]*domain.Article, error)
+}
+
+type articleRepository struct {
     client *ent.Client // Ent クライアントを使用してデータベースと通信
 }
 
-// NewArticleGateway は クライアントをフィールドに持つ ArticleGateway を返す。
-func NewArticleGateway(client *ent.Client) *ArticleGateway {
-    return &ArticleGateway{client: client}
+// NewArticleRepository は クライアントをフィールドに持つ ArticleRepository を返す。
+func NewArticleRepository(client *ent.Client) ArticleRepository {
+    return &articleRepository{client: client}
 }
 
 // GetArticles はデータベースから記事一覧を取得。
-func (g *ArticleGateway) GetArticles(ctx context.Context) ([]domain.Article, error) {
+func (r *articleRepository) GetArticles(ctx context.Context) ([]*domain.Article, error) {
     // データベースから記事をクエリ
-    articles, err := g.client.Article.Query().WithNewspaper().All(ctx)
+    articles, err := r.client.Article.Query().WithNewspaper().All(ctx)
     if err != nil {
         return nil, err // エラーが発生した場合は上位に返す
     }
 
     // データベースの結果をドメインモデルに変換
-    result := make([]domain.Article, len(articles))
+    result := make([]*domain.Article, len(articles))
     for i, a := range articles {
-        result[i] = domain.Article{
+        result[i] = &domain.Article{
             Year:       a.Year,
             Month:      a.Month,
             Day:        a.Day,
