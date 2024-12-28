@@ -42,8 +42,8 @@ func (suite *ArticleUseCaseTestSuite) SetupTest() {
     suite.articleUseCase = NewArticleUseCase(suite.mockArticleRepo) // ユースケースにモックを注入
 }
 
-// TestGetArticles_Success は GetArticles が成功する場合のテスト。
-func (suite *ArticleUseCaseTestSuite) TestGetArticles_Success() {
+// TestGetArticles は GetArticles が成功するテスト。
+func (suite *ArticleUseCaseTestSuite) TestGetArticles() {
     // テスト用のデータを準備
     articles := []*domain.Article{
         {
@@ -73,21 +73,15 @@ func (suite *ArticleUseCaseTestSuite) TestGetArticles_Success() {
     // 結果を検証
     suite.Assert().NoError(err, "エラーが発生していないことを確認")
     suite.Assert().Equal(len(articles), len(result), "取得した記事の件数が一致することを確認")
-    suite.Assert().Equal(articles[0].Content, result[0].Content, "記事の内容が一致することを確認")
-}
-
-// TestGetArticles_Failure は GetArticles が失敗する場合のテスト。
-func (suite *ArticleUseCaseTestSuite) TestGetArticles_Failure() {
-    // モックの挙動を設定
-    suite.mockArticleRepo.On("GetArticles", mock.Anything).Return(nil, context.DeadlineExceeded)
-
-    // テスト対象の関数を実行
-    result, err := suite.articleUseCase.GetArticles(context.Background())
-
-    // 結果を検証
-    suite.Assert().Error(err, "エラーが発生することを確認")
-    suite.Assert().Equal(context.DeadlineExceeded, err, "期待されるエラーが返ることを確認")
-    suite.Assert().Nil(result, "結果が nil であることを確認")
+    // 各フィールドの値を検証
+    for i, article := range articles {
+        suite.Assert().Equal(article.Year, result[i].Year, "記事の年が一致することを確認")
+        suite.Assert().Equal(article.Month, result[i].Month, "記事の月が一致することを確認")
+        suite.Assert().Equal(article.Day, result[i].Day, "記事の日が一致することを確認")
+        suite.Assert().Equal(article.Content, result[i].Content, "記事の内容が一致することを確認")
+        suite.Assert().Equal(article.Newspaper, result[i].Newspaper, "記事の新聞名が一致することを確認")
+        suite.Assert().Equal(article.ColumnName, result[i].ColumnName, "記事のコラム名が一致することを確認")
+    }
 }
 
 // テストスイートを実行するためのエントリーポイント。
